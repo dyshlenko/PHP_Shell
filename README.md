@@ -7,12 +7,14 @@ The bundled adapter class for connecting to ssh2. It is possible to develop an a
 Example of using:
 
 // Load classes files.
+
 require_once 'LogWrapper.php';
 require_once 'ShellConnector.php';
 require_once 'Ssh2Connector.php';
 require_once 'Shell.php';
 
 // Logger initialization
+
 require_once 'Log.php';
 $logger = Log::singleton('console');
 $logger->setMask(PEAR_LOG_ALL);
