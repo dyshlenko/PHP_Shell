@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Example of use Shell class</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	</head>
+	<body>
+		<pre>
+Oct 15 02:05:09  [info] Run main code.
+Oct 15 02:05:09  [debug] Ssh2Connector::__construct: Connection to localhost:22 established.
+
+isConnected() = bool(true)
+
+isLoggedIn() = bool(false)
+
+isOnline() = bool(false)
+
+
+<b>Login as user, password password</b>
+Oct 15 02:05:10  [debug] Ssh2Connector::login: user user logged in.
+
+isConnected() = bool(true)
+
+isLoggedIn() = bool(true)
+
+isOnline() = bool(true)
+Oct 15 02:05:10  [debug] Shell::eol: End of line setted to "\r"
+
+goAhead().
+
+getResult() = string(711) "Welcome to Ubuntu 14.04.5 LTS (GNU/Linux 3.13.0-35-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com/
+
+0 packages can be updated.
+0 updates are security updates.
+
+New release '16.04.3 LTS' available.
+Run 'do-release-upgrade' to upgrade to it.
+
+
+You have packages from the Hardware Enablement Stack (HWE) installed that
+are going out of support on 2016-08-04.
+        
+There is a graphics stack installed on this system. An upgrade to a
+configuration supported for the full lifetime of the LTS will become
+available on 2016-07-21 and can be installed by running 'update-manager'
+in the Dash.
+    
+Last login: Sun Oct 15 02:02:59 2017 from localhost
+
+user@ubuntu:~$ "
+
+
+<b>Execute command "df -lh"</b>
+string(616) "df -lh
+Файл.система   Размер Использовано  Дост Использовано% Cмонтировано в
+udev             2,9G         4,0K  2,9G            1% /dev
+tmpfs            584M         1,4M  582M            1% /run
+/dev/sda6         37G          34G  1,4G           97% /
+none             4,0K            0  4,0K            0% /sys/fs/cgroup
+none             5,0M            0  5,0M            0% /run/lock
+none             2,9G          13M  2,9G            1% /run/shm
+none             100M          28K  100M            1% /run/user
+user@ubuntu:~$ "
+
+
+<b>Logout user</b>
+Oct 15 02:05:22  [debug] Ssh2Connector::logout: user user logged out.
+
+isConnected() = bool(true)
+
+isLoggedIn() = bool(false)
+
+isOnline() = bool(false)
+
+
+Script finished. Runing time = 13 seconds.
+		</pre>
+	</body>
+</html>
