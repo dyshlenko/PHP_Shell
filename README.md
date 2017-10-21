@@ -5,7 +5,7 @@ Connect to a remote host through the adapter class. Write / read data to the str
 The bundled adapter class for connecting to ssh2. It is possible to develop an adapter class for telnet without modifying the existing code.
 
 Example of using:
-
+```php
 // Load classes files.
 
 require_once 'LogWrapper.php';
@@ -59,3 +59,4 @@ var_dump($shell->isLoggedIn());
 
 echo "\nisOnline() = ";
 var_dump($shell->isOnLine());
+```
