@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright 2016 Igor Dyshlenko
  *
@@ -30,18 +31,18 @@
  * @category Console
  * @license https://opensource.org/licenses/MIT MIT
  */
-
-interface ShellConnector {
+interface ShellConnector
+{
 
 	/**
 	 * Constructor
 	 * @param string $host
 	 * @param int $port
 	 * @param mixed $logger - PEAR Log class object for logging all events, any
-	 *						other value is ignored.
+	 * 						other value is ignored.
 	 * @throws LogicException if connect to server is fail.
 	 */
-	public function __construct($host, $port, $logger=null);
+	public function __construct ($host, $port, $logger = null);
 
 	/**
 	 * Login function
@@ -50,54 +51,53 @@ interface ShellConnector {
 	 * @return bool TRUE if success.
 	 * @throws LogicException if authentication error.
 	 */
-	public function login($userName, $pass='');
+	public function login ($userName, $pass = '');
 
 	/**
 	 * Logout function
 	 * @return bool TRUE if success, FALSE if fail.
 	 */
-	public function logout();
+	public function logout ();
 
 	/**
 	 * Disconnect function
 	 */
-	public function disconnect();
+	public function disconnect ();
 
 	/**
 	 * Get "is connected" state
 	 * @return bool TRUE if is connected.
 	 */
-	public function isConnected();
+	public function isConnected ();
 
 	/**
 	 * Get "is logged in" state
 	 * @return bool TRUE if is loged in.
 	 */
-	public function isLoggedIn();
+	public function isLoggedIn ();
 
 	/**
 	 * Get Error Message.
 	 * @return string error message if error, empty string ('') otherwise
 	 */
-	public function getError();
+	public function getError ();
 
 	/**
 	 * Get Error Number.
 	 * @return mixed - int error code if error, NULL otherwise
 	 */
-	public function getErrno();
+	public function getErrno ();
 
 	/**
 	 * Read character from stream
 	 * @return mixed string - readed character or FALSE if EOF or error
 	 */
-	public function read();
+	public function read ();
 
 	/**
 	 * Write data to stream.
 	 * @param string $data - data for write
 	 * @return mixed - number of written chars or FALSE if error
 	 */
-	public function write($data);
-
+	public function write ($data);
 }

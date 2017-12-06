@@ -1,5 +1,6 @@
 <?php
-/***
+
+/* * *
  * Copyright 2016 Igor Dyshlenko
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,8 +30,8 @@
  * @category Console
  * @license https://opensource.org/licenses/MIT MIT
  */
-
-class LogWrapper {
+class LogWrapper
+{
 
 	/**
 	 * Instance of PEAR\Log object.
@@ -42,7 +43,8 @@ class LogWrapper {
 	 * Constructor
 	 * @param PEAR\Log $logger
 	 */
-	public function __construct($logger) {
+	public function __construct ($logger)
+	{
 		if ($logger && is_object($logger) && is_a($logger, 'Log')) {
 			$this->logger = $logger;
 		}
@@ -53,7 +55,8 @@ class LogWrapper {
 	 * @param mixed $msg
 	 * @return bool True if the message was successfully logged.
 	 */
-	public function alert($msg){
+	public function alert ($msg)
+	{
 		if ($this->logger) {
 			return $this->logger->alert($msg);
 		}
@@ -65,7 +68,8 @@ class LogWrapper {
 	 * @param mixed $msg
 	 * @return bool True if the message was successfully logged.
 	 */
-	public function crit($msg){
+	public function crit ($msg)
+	{
 		if ($this->logger) {
 			return $this->logger->crit($msg);
 		}
@@ -76,7 +80,8 @@ class LogWrapper {
 	 * @param mixed $msg
 	 * @return bool True if the message was successfully logged.
 	 */
-	public function debug($msg){
+	public function debug ($msg)
+	{
 		if ($this->logger) {
 			return $this->logger->debug($msg);
 		}
@@ -88,7 +93,8 @@ class LogWrapper {
 	 * @param mixed $msg
 	 * @return bool True if the message was successfully logged.
 	 */
-	public function emerg($msg){
+	public function emerg ($msg)
+	{
 		if ($this->logger) {
 			return $this->logger->emerg($msg);
 		}
@@ -99,7 +105,8 @@ class LogWrapper {
 	 * @param mixed $msg
 	 * @return bool True if the message was successfully logged.
 	 */
-	public function err($msg){
+	public function err ($msg)
+	{
 		if ($this->logger) {
 			return $this->logger->err($msg);
 		}
@@ -111,7 +118,8 @@ class LogWrapper {
 	 * @param mixed $msg
 	 * @return bool True if the message was successfully logged.
 	 */
-	public function info($msg){
+	public function info ($msg)
+	{
 		if ($this->logger) {
 			return $this->logger->info($msg);
 		}
@@ -121,13 +129,14 @@ class LogWrapper {
 	 * Log an event.
 	 * @param mixed $msg
 	 * @param int $priority (optional) The priority of the message. Valid values
-	 *				are: LOG_EMERG, LOG_ALERT, LOG_CRIT, LOG_ERR, LOG_WARNING,
-	 *				LOG_NOTICE, LOG_INFO, and LOG_DEBUG. The default is LOG_INFO.
+	 * 				are: LOG_EMERG, LOG_ALERT, LOG_CRIT, LOG_ERR, LOG_WARNING,
+	 * 				LOG_NOTICE, LOG_INFO, and LOG_DEBUG. The default is LOG_INFO.
 	 * @return bool True if the message was successfully logged.
 	 */
-	public function log($msg, $priority = null){
+	public function log ($msg, $priority = null)
+	{
 		if ($this->logger) {
-			return $this->logger->log($msg);
+			return $this->logger->log($msg, $priority);
 		}
 	}
 
@@ -136,7 +145,8 @@ class LogWrapper {
 	 * @param mixed $msg
 	 * @return bool True if the message was successfully logged.
 	 */
-	public function notice($msg){
+	public function notice ($msg)
+	{
 		if ($this->logger) {
 			return $this->logger->notice($msg);
 		}
@@ -147,9 +157,11 @@ class LogWrapper {
 	 * @param mixed $msg
 	 * @return bool True if the message was successfully logged.
 	 */
-	public function warning($msg){
+	public function warning ($msg)
+	{
 		if ($this->logger) {
 			return $this->logger->warning($msg);
 		}
 	}
+
 }

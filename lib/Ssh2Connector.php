@@ -1,5 +1,6 @@
 <?php
-/***
+
+/* * *
  * Copyright 2016 Igor Dyshlenko
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,203 +31,220 @@
  * @category Console
  * @license https://opensource.org/licenses/MIT MIT
  */
+class Ssh2Connector implements ShellConnector
+{
 
-class Ssh2Connector implements ShellConnector {
-	protected $host, $port, $userName;
-	protected $callbacks;
+    protected $host, $port, $userName;
+    protected $callbacks;
+    protected
+            $connection  = null,
+            $connected   = false,
+            $connErrCode = null,
+            $connErrMsg  = '',
+            $connErrLang = null;
+    protected $shell       = null;
+    protected $logger      = null;
+    protected $writeBuffer = null;
 
-	protected 
-		$connection		= null,
-		$connected		= false,
-		$connErrCode	= null,
-		$connErrMsg		= '',
-		$connErrLang	= null;
+    /**
+     * Constructor
+     * @param string $host
+     * @param int $port - default 22.
+     * @param mixed $logger - PEAR Log class object for logging all events, any
+     * 						other value is ignored.
+     * @throws BadFunctionCallException if ssh2_connect() function doesn't exist.
+     * @throws LogicException if connect to ssh server is fail.
+     */
+    public function __construct ($host, $port = 22, $logger = null)
+    {
+        $this->logger = new LogWrapper($logger);
 
-	protected $shell	= null;
-	protected $logger	= null;
-	protected $writeBuffer	=	null;
+        if (!function_exists('ssh2_connect')) {
+            $msg = 'Function ssh2_connect doesn\'t exist.';
+            $this->logger->err(__METHOD__ . ': ' . $msg);
+            throw new BadFunctionCallException($msg);
+        }
 
-	/**
-	 * Constructor
-	 * @param string $host
-	 * @param int $port - default 22.
-	 * @param mixed $logger - PEAR Log class object for logging all events, any
-	 *						other value is ignored.
-	 * @throws BadFunctionCallException if ssh2_connect() function doesn't exist.
-	 * @throws LogicException if connect to ssh server is fail.
-	 */
-	public function __construct($host, $port=22, $logger=null) {
-		$this->logger = new LogWrapper($logger);
+        $this->host       = $host;
+        $this->port       = $port;
+        $this->callbacks  = array('disconnect' => array($this, 'ssh_disconnect'));
+        if (!($this->connection = ssh2_connect($host, $port, null,
+                                               $this->callbacks))) {
+            $msg = 'Fail: unable to establish connection to ' . $host . ':' . $port .
+                    "\n" . $this->connErrCode . ': ' . $this->connErrMsg;
+            $this->logger->err(__METHOD__ . ': ' . $msg);
+            throw new LogicException($msg);
+        }
+        $this->logger->debug(__METHOD__ . ': Connection to ' . $host . ':' . $port . ' established.');
+        $this->connected = true;
+    }
 
-		if (!function_exists('ssh2_connect')) {
-			$msg = 'Function ssh2_connect doesn\'t exist.';
-			$this->logger->err(__METHOD__ . ': ' . $msg);
-			throw new BadFunctionCallException($msg);
-		}
+    public function __destruct ()
+    {
+        $this->logout();
+        $this->disconnect();
+    }
 
-		$this->host = $host;
-		$this->port = $port;
-		$this->callbacks = array('disconnect' => array($this, 'ssh_disconnect'));
-		if (!($this->connection = ssh2_connect($host, $port, null, $this->callbacks))) {
-			$msg = 'Fail: unable to establish connection to ' . $host . ':' . $port .
-					"\n" . $this->connErrCode . ': ' . $this->connErrMsg;
-			$this->logger->err(__METHOD__ . ': ' . $msg);
-			throw new LogicException($msg);
-		}
-		$this->logger->debug(__METHOD__ . ': Connection to ' . $host . ':' . $port . ' established.');
-		$this->connected = true;
-	}
+    /**
+     * Login function
+     * @param string $userName - user name (login).
+     * @param string $pass - password.
+     * @return bool true if success.
+     * @throws LogicException if authentication error.
+     */
+    public function login ($userName, $pass = '')
+    {
+        if (!ssh2_auth_password($this->connection, $userName, $pass)) {
+            $msg = 'Fail: unable to authenticate user ' . $userName;
+            $this->logger->err(__METHOD__ . ': ' . $msg);
+            throw new LogicException($msg);
+        }
 
-	public function __destruct() {
-		$this->logout();
-		$this->disconnect();
-	}
+        $this->userName = $userName;
 
-	/**
-	 * Login function
-	 * @param string $userName - user name (login).
-	 * @param string $pass - password.
-	 * @return bool true if success.
-	 * @throws LogicException if authentication error.
-	 */
-	public function login($userName, $pass='') {
-		if (!ssh2_auth_password($this->connection, $userName, $pass)) {
-			$msg = 'Fail: unable to authenticate user ' . $userName;
-			$this->logger->err(__METHOD__ . ': ' . $msg);
-			throw new LogicException($msg);
-		}
+        if (!($this->shell = ssh2_shell($this->connection, 'vt102', null, 80,
+                                        40, SSH2_TERM_UNIT_CHARS))) {
+            $msg = 'Fail: unable to establish shell.';
+            $this->logger->err(__METHOD__ . ': ' . $msg);
+            throw new LogicException($msg);
+        }
 
-		$this->userName = $userName;
+        $this->loggedIn = true;
+        $this->logger->debug(__METHOD__ . ': user ' . $userName . ' logged in.');
 
-		if (!($this->shell = ssh2_shell($this->connection, 'vt102', null, 80, 40, SSH2_TERM_UNIT_CHARS))) {
-			$msg = 'Fail: unable to establish shell.';
-			$this->logger->err(__METHOD__ . ': ' . $msg);
-			throw new LogicException($msg);
-		}
+        return true;
+    }
 
-		$this->loggedIn = true;
-		$this->logger->debug(__METHOD__ . ': user ' . $userName . ' logged in.');
+    /**
+     * Logout function
+     * @return bool true if success, false if fail.
+     */
+    public function logout ()
+    {
+        if ($this->isLoggedIn()) {
+            fclose($this->shell);
+            $this->logger->debug(__METHOD__ . ': user ' . $this->userName . ' logged out.');
 
-		return true;
-	}
+            return true;
+        }
 
-	/**
-	 * Logout function
-	 * @return bool true if success, false if fail.
-	 */
-	public function logout() {
-		if ($this->isLoggedIn()) {
-			fclose($this->shell);
-			$this->logger->debug(__METHOD__ . ': user ' . $this->userName . ' logged out.');
+        return false;
+    }
 
-			return true;
-		}
+    public function disconnect ()
+    {
+        
+    }
 
-		return false;
-	}
+    /**
+     * Get "is ssh2 connected" state
+     * @return bool
+     */
+    public function isConnected ()
+    {
+        return $this->connected;
+    }
 
-	public function disconnect() {}
+    /**
+     * Get "is logged in" state
+     * @return bool
+     */
+    public function isLoggedIn ()
+    {
+        return is_resource($this->shell);
+    }
 
-	/**
-	 * Get "is ssh2 connected" state
-	 * @return bool
-	 */
-	public function isConnected() {
-		return $this->connected;
-	}
+    /**
+     * Callback "disconnect" function for ssh2_connect().
+     * @param int $reason - Error Number
+     * @param string $message - Error message
+     * @param mixed $language
+     */
+    public function ssh_disconnect ($reason, $message, $language)
+    {
+        $this->connected   = false;
+        $this->connErrCode = $reason;
+        $this->connErrMsg  = $message;
+        $this->connErrLang = $language;
+        $this->logger->debug(__METHOD__ . ': SSH2 connection ' . $this->userName
+                . '@' . $this->host . ':' . $this->port . ' closed. ' . $reason
+                . ': ' . $message);
+    }
 
-	/**
-	 * Get "is logged in" state
-	 * @return bool
-	 */
-	public function isLoggedIn() {
-		return is_resource($this->shell);
-	}
+    /**
+     * Get Error Message returned ssh2_connect() function.
+     * @return string error message if error, empty string ('') otherwise
+     */
+    public function getError ()
+    {
+        return $this->connErrMsg;
+    }
 
-	/**
-	 * Callback "disconnect" function for ssh2_connect().
-	 * @param int $reason - Error Number
-	 * @param string $message - Error message
-	 * @param mixed $language
-	 */
-	public function ssh_disconnect($reason, $message, $language) {
-		$this->connected = false;
-		$this->connErrCode = $reason;
-		$this->connErrMsg = $message;
-		$this->connErrLang = $language;
-		$this->logger->debug(__METHOD__ . ': SSH2 connection ' . $this->userName . '@' . $this->host .
-			':' . $this->port . ' closed. ' . $reason . ': ' . $message);
-	}
+    /**
+     * Get Error Number returned ssh2_connect() function.
+     * @return mixed - int error code if error, NULL otherwise
+     */
+    public function getErrno ()
+    {
+        return $this->connErrCode;
+    }
 
-	/**
-	 * Get Error Message returned ssh2_connect() function.
-	 * @return string error message if error, empty string ('') otherwise
-	 */
-	public function getError() {
-		return $this->connErrMsg;
-	}
+    /**
+     * Read character from stream.
+     * @return mixed - string (readed character) or FALSE if EOF or error.
+     */
+    public function read ()
+    {
 
-	/**
-	 * Get Error Number returned ssh2_connect() function.
-	 * @return mixed - int error code if error, NULL otherwise
-	 */
-	public function getErrno() {
-		return $this->connErrCode;
-	}
+        if (!($this->isLoggedIn() && $this->isConnected()) || feof($this->shell)) {
+            $this->logger->debug(__METHOD__ . ': SSH2 connection ' . $this->userName . '@' . $this->host .
+                    ':' . $this->port . ' closed or logged out or feof().');
+            return false;
+        }
 
-	/**
-	 * Read character from stream.
-	 * @return mixed - string (readed character) or FALSE if EOF or error.
-	 */
-	public function read() {
+        $char = fread($this->shell, 1);
 
-		if (!($this->isLoggedIn() && $this->isConnected()) || feof($this->shell)){
-			$this->logger->debug(__METHOD__ . ': SSH2 connection ' . $this->userName . '@' . $this->host .
-				':' . $this->port . ' closed or logged out or feof().');
-			return false;
-		}
+        if ($char === '' && !feof($this->shell)) {
+            usleep(100000);
+            $char = fread($this->shell, 1);
+        }
 
-		$char = fread($this->shell, 1);
+        if ($char === false) {
+            $this->logger->debug(__METHOD__ . ': Error read from stream.');
+        }
 
-		if ($char === '' && !feof($this->shell)) {
-			usleep(100000);
-			$char = fread($this->shell, 1);
-		}
+        return $char;
+    }
 
-		if ($char === false) {
-			$this->logger->debug(__METHOD__ . ': Error read from stream.');
-		}
+    /**
+     * Write data to ssh connection.
+     * @param string $data - data for write
+     * @return int - number of written chars or FALSE if error
+     */
+    public function write ($data)
+    {
+        $total   = strlen($data);
+        $written = $n       = 0;
+        $buf     = $data;
 
-		return $char;
-	}
+        while ($written < $total) {
+            $buf = substr($buf, $n);
+            if (($n   = fwrite($this->shell, $buf, 4096)) === false) {
+                if (feof($this->shell)) {
+                    $this->logger->debug(__METHOD__ . ': ' . $this->userName . '@' . $this->host . ' disconnected.');
+                    break;
+                } else {
+                    $msg = 'Error writing to socket.';
+                    $this->logger->err(__METHOD__ . ': ' . $msg);
+                    throw new RuntimeException($msg);
+                }
+            }
+            $written += $n;
+        }
 
-	/**
-	 * Write data to ssh connection.
-	 * @param string $data - data for write
-	 * @return int - number of written chars or FALSE if error
-	 */
-	public function write($data) {
-		$total = strlen($data);
-		$written = $n = 0;
-		$buf = $data;
+        fflush($this->shell);
 
-		while ($written < $total){
-			$buf = substr($buf,$n);
-			if (($n = fwrite($this->shell,$buf,4096)) === false) {
-				if (feof($this->shell)) {
-					$this->logger->debug(__METHOD__ . ': ' . $this->userName . '@' . $this->host . ' disconnected.');
-					break;
-				} else {
-					$msg = 'Error writing to socket.';
-					$this->logger->err(__METHOD__ . ': ' . $msg);
-					throw new RuntimeException($msg);
-				}
-			}
-			$written += $n;
-		}
+        return !$this->connected || feof($this->shell) ? false : $written;
+    }
 
-		fflush($this->shell);
-
-		return !$this->connected || feof($this->shell) ? false : $written;
-	}
 }
