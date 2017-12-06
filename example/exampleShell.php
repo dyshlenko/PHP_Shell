@@ -50,12 +50,12 @@ ini_set('request_order', 'CGP');
 error_reporting(-1);
 ini_set('error_reporting', E_ALL);
 
-require_once 'LogWrapper.php';
-require_once 'ShellConnector.php';
-require_once 'Ssh2Connector.php';
-require_once 'Shell.php';
+require_once '../lib/LogWrapper.php';
+require_once '../lib/ShellConnector.php';
+require_once '../lib/Ssh2Connector.php';
+require_once '../lib/Shell.php';
 
-// Logger initialization
+// https://pear.php.net/package/Log/ Logger initialization
 require_once 'Log.php';
 $logger = Log::singleton('console');
 $logger->setMask(PEAR_LOG_ALL);
