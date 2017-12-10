@@ -1,5 +1,6 @@
 # shell
 v 0.01b
+
 PHP connect to remote host over ssh
 
 Connect to a remote host through the adapter class. Write / read data to the stream, execute commands on the remote host, obtain the result of the execution of commands.
