@@ -32,87 +32,88 @@
 ?>
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Example of use Shell class</title>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	</head>
-	<body>
-		<pre>
-			<?php
-			$start = time();
+    <head>
+        <title>Example of use Shell class</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <pre>
+            <?php
+            $start = time();
 
-			ini_set('request_order', 'CGP');
+            ini_set('request_order', 'CGP');
 
-// Report all PHP errors
-			error_reporting(-1);
-			ini_set('error_reporting', E_ALL);
+            // Report all PHP errors
+            error_reporting(-1);
+            ini_set('error_reporting', E_ALL);
 
-			require_once '../lib/LogWrapper.php';
-			require_once '../lib/ShellConnector.php';
-			require_once '../lib/Ssh2Connector.php';
-			require_once '../lib/Shell.php';
+            require_once '../lib/LogWrapper.php';
+            require_once '../lib/ShellConnector.php';
+            require_once '../lib/Ssh2Connector.php';
+            require_once '../lib/Shell.php';
 
-			// https://pear.php.net/package/Log/ Logger initialization
-			require_once 'Log.php';
-			$logger = Log::singleton('console');
-			$logger->setMask(PEAR_LOG_ALL);
+            // https://pear.php.net/package/Log/ Logger initialization
+            require_once 'Log.php';
+            $logger = Log::singleton('console');
+            $logger->setMask(PEAR_LOG_ALL);
 
-			const HOST = 'localhost';
-			const COMMAND = 'df -lh';
-			const
-					LOGIN = 'user',
-					PASSWORD = 'password';
+            const HOST = 'localhost';
+            const COMMAND = 'df -lh';
+            const
+                    LOGIN = 'user',
+                    PASSWORD = 'password';
 
-			$logger->info('Run main code.');
+            $logger->info('Run main code.');
 
-			$shell = new Shell(new Ssh2Connector(HOST, 22, $logger), null, null, $logger);
+            $shell = new Shell(new Ssh2Connector(HOST, 22, $logger), null, null,
+                               $logger);
 
-			echo "\nisConnected() = ";
-			var_dump($shell->isConnested());
+            echo "\nisConnected() = ";
+            var_dump($shell->isConnested());
 
-			echo "\nisLoggedIn() = ";
-			var_dump($shell->isLoggedIn());
+            echo "\nisLoggedIn() = ";
+            var_dump($shell->isLoggedIn());
 
-			echo "\nisOnline() = ";
-			var_dump($shell->isOnLine());
+            echo "\nisOnline() = ";
+            var_dump($shell->isOnLine());
 
-			echo "\n\n<b>Login as ", LOGIN, ', password ', PASSWORD, "</b>\n";
-			$shell->login(LOGIN, PASSWORD);
+            echo "\n\n<b>Login as ", LOGIN, ', password ', PASSWORD, "</b>\n";
+            $shell->login(LOGIN, PASSWORD);
 
-			echo "\nisConnected() = ";
-			var_dump($shell->isConnested());
+            echo "\nisConnected() = ";
+            var_dump($shell->isConnested());
 
-			echo "\nisLoggedIn() = ";
-			var_dump($shell->isLoggedIn());
+            echo "\nisLoggedIn() = ";
+            var_dump($shell->isLoggedIn());
 
-			echo "\nisOnline() = ";
-			var_dump($shell->isOnLine());
+            echo "\nisOnline() = ";
+            var_dump($shell->isOnLine());
 
-			$shell->eol("\r");
-			echo "\ngoAhead().\n";
-			$shell->goAhead();
-			echo "\ngetResult() = ";
-			var_dump($shell->getResult());
+            $shell->eol("\r");
+            echo "\ngoAhead().\n";
+            $shell->goAhead();
+            echo "\ngetResult() = ";
+            var_dump($shell->getResult());
 
-			echo "\n\n<b>Execute command \"", COMMAND, "\"</b>\n";
-			var_dump($result = $shell->exec(COMMAND));
+            echo "\n\n<b>Execute command \"", COMMAND, "\"</b>\n";
+            var_dump($result = $shell->exec(COMMAND));
 
-			echo "\n\n<b>Logout ", LOGIN, "</b>\n";
-			$shell->logout();
+            echo "\n\n<b>Logout ", LOGIN, "</b>\n";
+            $shell->logout();
 
-			echo "\nisConnected() = ";
-			var_dump($shell->isConnested());
+            echo "\nisConnected() = ";
+            var_dump($shell->isConnested());
 
-			echo "\nisLoggedIn() = ";
-			var_dump($shell->isLoggedIn());
+            echo "\nisLoggedIn() = ";
+            var_dump($shell->isLoggedIn());
 
-			echo "\nisOnline() = ";
-			var_dump($shell->isOnLine());
+            echo "\nisOnline() = ";
+            var_dump($shell->isOnLine());
 
-			echo "\n\nScript finished. Runing time = ", time() - $start, ' seconds.';
-			?>
+            echo "\n\nScript finished. Runing time = ", time() - $start, ' seconds.';
+            ?>
 
-		</pre>
-	</body>
+        </pre>
+    </body>
 </html>
