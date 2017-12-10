@@ -48,10 +48,13 @@
             error_reporting(-1);
             ini_set('error_reporting', E_ALL);
 
-            require_once '../lib/LogWrapper.php';
-            require_once '../lib/ShellConnector.php';
-            require_once '../lib/Ssh2Connector.php';
-            require_once '../lib/Shell.php';
+            use din70\Tools\ShellAccess\Ssh2Connector;
+            use din70\Tools\ShellAccess\Shell;
+
+            require_once '../lib/din70/Tools/ShellAccess/LogWrapper.php';
+            require_once '../lib/din70/Tools/ShellAccess/ShellConnectorInterface.php';
+            require_once '../lib/din70/Tools/ShellAccess/Ssh2Connector.php';
+            require_once '../lib/din70/Tools/ShellAccess/Shell.php';
 
             // https://pear.php.net/package/Log/ Logger initialization
             require_once 'Log.php';
@@ -70,7 +73,7 @@
                                $logger);
 
             echo "\nisConnected() = ";
-            var_dump($shell->isConnested());
+            var_dump($shell->isConnected());
 
             echo "\nisLoggedIn() = ";
             var_dump($shell->isLoggedIn());
@@ -82,7 +85,7 @@
             $shell->login(LOGIN, PASSWORD);
 
             echo "\nisConnected() = ";
-            var_dump($shell->isConnested());
+            var_dump($shell->isConnected());
 
             echo "\nisLoggedIn() = ";
             var_dump($shell->isLoggedIn());
@@ -103,7 +106,7 @@
             $shell->logout();
 
             echo "\nisConnected() = ";
-            var_dump($shell->isConnested());
+            var_dump($shell->isConnected());
 
             echo "\nisLoggedIn() = ";
             var_dump($shell->isLoggedIn());

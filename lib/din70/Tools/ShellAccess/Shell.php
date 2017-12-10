@@ -37,6 +37,9 @@
  * @category Console
  * @license https://opensource.org/licenses/MIT MIT
  */
+
+namespace din70\Tools\ShellAccess;
+
 class Shell
 {
 
@@ -58,8 +61,11 @@ class Shell
      * @param Log $logger - PEAR Log object or null
      * @throws LogicException
      */
-    public function __construct (
-    ShellConnector $connector, $prompt = '$ ', $timeout = null, $logger = null)
+    public function __construct(
+            ShellConnectorInterface $connector,
+            $prompt = '$ ',
+            $timeout = null,
+            $logger = null)
     {
         $this->logger = new LogWrapper($logger);
 
@@ -77,7 +83,7 @@ class Shell
         $this->prompt    = $prompt;
     }
 
-    public function __destruct ()
+    public function __destruct()
     {
         $this->logout();
         if ($this->connector->isLoggedIn()) {
@@ -95,7 +101,7 @@ class Shell
      * @return bool true if success.
      * @throws LogicException if authentication error.
      */
-    public function login ($username, $pass)
+    public function login($username, $pass)
     {
         return $this->connector->login($username, $pass);
     }
@@ -104,7 +110,7 @@ class Shell
      * Logout function
      * @return bool true if success, false if fail.
      */
-    public function logout ()
+    public function logout()
     {
         return $this->connector->logout();
     }
@@ -114,7 +120,7 @@ class Shell
      * @param string $command
      * @return string result.
      */
-    public function exec ($command)
+    public function exec($command)
     {
         $this->write($command . $this->eol);
         $this->read($this->prompt);
@@ -133,7 +139,7 @@ class Shell
      * Get the result (screen buffer).
      * @return string
      */
-    public function getResult ()
+    public function getResult()
     {
         $result           = $this->readBuffer;
         $this->readBuffer = '';
@@ -144,7 +150,7 @@ class Shell
      * Get Error Message.
      * @return string error message if error, empty string ('') otherwise
      */
-    public function getError ()
+    public function getError()
     {
         return $this->connector->getError();
     }
@@ -153,7 +159,7 @@ class Shell
      * Get Error number.
      * @return mixed int error code if error, NULL otherwise
      */
-    public function getErrno ()
+    public function getErrno()
     {
         return $this->connector->getErrno();
     }
@@ -162,7 +168,7 @@ class Shell
      * Get "is connected" state
      * @return bool
      */
-    public function isConnested ()
+    public function isConnected()
     {
         return $this->connector->isConnected();
     }
@@ -171,7 +177,7 @@ class Shell
      * Get "is logged in" state
      * @return bool
      */
-    public function isLoggedIn ()
+    public function isLoggedIn()
     {
         return $this->connector->isLoggedIn();
     }
@@ -180,9 +186,9 @@ class Shell
      * Can execute the operation?
      * @return boolean
      */
-    public function isOnLine ()
+    public function isOnLine()
     {
-        return $this->isConnested() && $this->isLoggedIn();
+        return $this->isConnected() && $this->isLoggedIn();
     }
 
     /*     * *
@@ -190,14 +196,14 @@ class Shell
      */
     /* 	public function isOk() {
       return false;
-      }*/
+      } */
 
     /**
      * Set / get end-of-line value
      * @param mixed $eol if NULL - do nothing, else - set new end-of-line value.
      * @return string current end-of-line value.
      */
-    public function eol ($eol = null)
+    public function eol($eol = null)
     {
         if (!is_null($eol)) {
             $this->eol = strval($eol);
@@ -214,7 +220,7 @@ class Shell
      * 						prompt value.
      * @return string current prompt command line value.
      */
-    public function prompt ($prompt = null)
+    public function prompt($prompt = null)
     {
         if (!is_null($prompt)) {
             $this->prompt = strval($prompt);
@@ -229,7 +235,7 @@ class Shell
      * Skip all data before the command prompt.
      * @return mixed FALSE if error, (int) count readed data bytes otherwise
      */
-    public function goAhead ()
+    public function goAhead()
     {
         return $this->read($this->prompt);
     }
@@ -240,7 +246,7 @@ class Shell
      * @param int $numChars - skip a maximum of $numChars characters.
      * @return mixed FALSE if error, (int) count readed data bytes otherwise
      */
-    public function read ($searchFor = null, $numChars = null)
+    public function read($searchFor = null, $numChars = null)
     {
         $buffer   = '';
         $nums     = intval($numChars);
@@ -274,7 +280,7 @@ class Shell
      * Get symbol from connector input stream
      * @return mixed string or FALSE if eof().
      */
-    protected function readStream ()
+    protected function readStream()
     {
         return $this->connector->read();
     }
@@ -282,28 +288,29 @@ class Shell
     /**
      * Write data to stream
      * @param string $data - data for write to input stream
-     * @return int number of written chars
+     * @return mixed - (int) count of written chars or FALSE if error
+     * @throws RuntimeException
      */
-    public function write ($data)
+    public function write($data)
     {
-        $this->writeBuffer .= $data;
-        return $this->writeStream();
+        if ($this->isOnLine()) {
+            $this->writeBuffer .= $data;
+            return $this->writeStream();
+        }
+
+        return false;
     }
 
     /**
      * Put data to connector output stream
-     * @param type $data
-     * @return int
+     * @param string $data
+     * @return mixed - (int) count of written chars or FALSE if error
      * @throws RuntimeException
      */
-    protected function writeStream ($data = null)
+    protected function writeStream($data = null)
     {
         $written = 0;
         $n       = 0;
-
-        if (!$this->isOnLine()) {
-            return 0;
-        }
 
         if (($data !== null) and ( strlen($data) > 0)) {
             $buf   = $data;
@@ -316,10 +323,10 @@ class Shell
 
         while ($written < $total) {
             $buf = substr($buf, $n);
-            if (($n   = $this->connector->write($buf)) === false) {
-                if (!$this->isConnested()) {
+            if (($n = $this->connector->write($buf)) === false) {
+                if (!$this->isConnected()) {
                     $this->logger->debug(__METHOD__ . ': Disconnected.');
-                    break;
+                    return false;
                 } else {
                     $this->logger->err(__METHOD__ . ': Error writing to socket.');
                     throw new RuntimeException('Error writing to socket.');
