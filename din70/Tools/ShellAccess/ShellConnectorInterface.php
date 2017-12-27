@@ -31,7 +31,9 @@
  * @category Console
  * @license https://opensource.org/licenses/MIT MIT
  */
-interface ShellConnector
+namespace din70\Tools\ShellAccess;
+
+interface ShellConnectorInterface
 {
 
 	/**
@@ -40,7 +42,7 @@ interface ShellConnector
 	 * @param int $port
 	 * @param mixed $logger - PEAR Log class object for logging all events, any
 	 * 						other value is ignored.
-	 * @throws LogicException if connect to server is fail.
+     * @throws RuntimeException if connect to server is fail.
 	 */
 	public function __construct ($host, $port, $logger = null);
 
@@ -49,7 +51,7 @@ interface ShellConnector
 	 * @param string $userName
 	 * @param string $pass
 	 * @return bool TRUE if success.
-	 * @throws LogicException if authentication error.
+	 * @throws RuntimeException if authentication error.
 	 */
 	public function login ($userName, $pass = '');
 
@@ -78,7 +80,7 @@ interface ShellConnector
 
 	/**
 	 * Get Error Message.
-	 * @return string error message if error, empty string ('') otherwise
+	 * @return string error message if error, empty string ("") otherwise
 	 */
 	public function getError ();
 

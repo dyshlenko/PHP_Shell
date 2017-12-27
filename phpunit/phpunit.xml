@@ -1,0 +1,9 @@
+<phpunit>
+  <testsuites>
+    <testsuite name="shell">
+      <file>LogWrapperTest.php</file>
+      <file>Ssh2ConnectorTest.php</file>
+      <file>ShellTest.php</file>
+    </testsuite>
+  </testsuites>
+</phpunit>

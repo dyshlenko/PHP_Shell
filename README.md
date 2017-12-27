@@ -1,5 +1,5 @@
 # shell
-v 0.01b
+v 1.02b
 
 PHP connect to remote host over ssh
 
@@ -9,10 +9,10 @@ The bundled adapter class for connecting to ssh2. It is possible to develop an a
 Example of using:
 ```php
 // Load classes files.
-require_once 'lib/LogWrapper.php';
-require_once 'lib/ShellConnector.php';
-require_once 'lib/Ssh2Connector.php';
-require_once 'lib/Shell.php';
+require_once 'din70/Tools/ShellAccess/ShellConnectorInterface.php';
+require_once 'din70/Tools/ShellAccess/LogWrapper.php';
+require_once 'din70/Tools/ShellAccess/Ssh2Connector.php';
+require_once 'din70/Tools/ShellAccess/Shell.php';
 
 // Logger initialization
 require_once 'Log.php';
