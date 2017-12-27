@@ -7,7 +7,7 @@
 use din70\Tools\ShellAccess\LogWrapper;
 use PHPUnit\Framework\TestCase;
 
-require_once '../lib/din70/Tools/ShellAccess/LogWrapper.php';
+require_once '../din70/Tools/ShellAccess/LogWrapper.php';
 
 class LogWrapperTest extends TestCase
 {

@@ -8,9 +8,9 @@
 use din70\Tools\ShellAccess\Ssh2Connector;
 use PHPUnit\Framework\TestCase;
 
-require_once '../lib/din70/Tools/ShellAccess/ShellConnectorInterface.php';
-require_once '../lib/din70/Tools/ShellAccess/LogWrapper.php';
-require_once '../lib/din70/Tools/ShellAccess/Ssh2Connector.php';
+require_once '../din70/Tools/ShellAccess/ShellConnectorInterface.php';
+require_once '../din70/Tools/ShellAccess/LogWrapper.php';
+require_once '../din70/Tools/ShellAccess/Ssh2Connector.php';
 require_once './commonData.php';
 
 class Ssh2ConnectorTest extends TestCase

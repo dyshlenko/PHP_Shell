@@ -51,10 +51,10 @@
             use din70\Tools\ShellAccess\Ssh2Connector;
             use din70\Tools\ShellAccess\Shell;
 
-            require_once '../lib/din70/Tools/ShellAccess/LogWrapper.php';
-            require_once '../lib/din70/Tools/ShellAccess/ShellConnectorInterface.php';
-            require_once '../lib/din70/Tools/ShellAccess/Ssh2Connector.php';
-            require_once '../lib/din70/Tools/ShellAccess/Shell.php';
+            require_once '../din70/Tools/ShellAccess/LogWrapper.php';
+            require_once '../din70/Tools/ShellAccess/ShellConnectorInterface.php';
+            require_once '../din70/Tools/ShellAccess/Ssh2Connector.php';
+            require_once '../din70/Tools/ShellAccess/Shell.php';
 
             // https://pear.php.net/package/Log/ Logger initialization
             require_once 'Log.php';
